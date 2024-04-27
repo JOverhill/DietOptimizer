@@ -1,5 +1,14 @@
 <script>
+    import { onMount } from 'svelte';
+
     let current = '/';
+    const initializeCurrent = () => {
+        const currentPath = window.location.pathname;
+        current = currentPath === '/' ? '/' : '/ruuat';
+    };
+
+    onMount(initializeCurrent);
+
 </script>
 
 <header>

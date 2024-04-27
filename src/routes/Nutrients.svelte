@@ -102,12 +102,13 @@
     .calc-button {
         margin-top: 40px;
         text-align: center;  
-         
+        cursor: pointer; 
     }
     
     button {
         width: 120px; 
         height: 40px; 
-        font-size: 18px; 
+        font-size: 18px;
+        cursor: pointer; 
     }
 </style>
