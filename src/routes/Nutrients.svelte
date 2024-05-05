@@ -11,14 +11,21 @@
 
      // Function to handle checkbox change event
      function handleCheckboxChange(event) {
-        const { name, checked } = event.target;
-        formData[name] = checked ? 1 : 0;
+    const { name, checked } = event.target;
+    if (checked) {
+        formData[name] = parseFloat(document.querySelector(`input[name="${name}"][type="number"]`).value) || 0;
+    } else {
+        formData[name] = 0; // Set to 0 if unchecked
     }
+}
 
     // Function to handle number input change event
     function handleInputChange(event) {
         const { name, value } = event.target;
-        formData[name] = parseFloat(value) || 0; // Convert input value to a number, default to 0 if NaN
+        const checkbox = document.querySelector(`input[name="${name}"][type="checkbox"]`);
+        if (checkbox && checkbox.checked) {
+                formData[name] = parseFloat(value) || 0;
+    }
     }
 
     // Function to handle form submission
@@ -44,6 +51,17 @@
         }
     }
 
+    // Function to initialize formData based on checkbox state on mount
+    function initializeFormData() {
+        Object.keys(formData).forEach(key => {
+            const input = document.querySelector(`input[name="${key}"][type="checkbox"]`);
+            if (input && input.checked) {
+                formData[key] = parseFloat(document.querySelector(`input[name="${key}"][type="number"]`).value) || 0;
+            }
+        });
+}
+
+    onMount(initializeFormData);
 
 </script>
 
