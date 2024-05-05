@@ -3,10 +3,51 @@
 	<meta name="description" content="Ruuat" />
 </svelte:head>
 
+<!-- Modal for adding new food -->
+<div class="modal" style="display: {modalOpen ? 'block' : 'none'}">
+    <div class="modal-content">
+		<h2>Lisää ruoka</h2>    
+        <form on:submit|preventDefault={handleAddFood}>
+            <label>
+                Nimi:
+                <input type="text" bind:value="{newFood.name}" />
+            </label>
+			<label>
+                Kcal:
+                <input type="number" bind:value="{newFood.calories}" />
+            </label>
+            <label>
+                Hiilihydraatit:
+                <input type="number" bind:value="{newFood.carbohydrates}" />
+            </label>
+            <label>
+                Proteiini:
+                <input type="number" bind:value="{newFood.protein}" />
+            </label>
+            <label>
+                Rasva:
+                <input type="number" bind:value="{newFood.fat}" />
+            </label>
+            <label>
+                Kuitu:
+                <input type="number" bind:value="{newFood.fiber}" />
+            </label>
+			<label>
+                Hinta(€):
+                <input type="number" step="0.01" bind:value="{newFood.price}" />
+            </label>
+            <button type="submit">Lisää</button>
+			<button type="button" on:click={closeModal}>Peruuta</button>
+        </form>
+    </div>
+</div>
+
 <script>
 	import { onMount } from "svelte";
 	import { writable } from 'svelte/store';
 	let foods = writable([]);
+	let modalOpen = false;
+    let newFood = { name: '', price: 0, calories: 0, carbohydrates: 0, protein: 0, fat: 0, fiber: 0};
 
 	const fetchFoods = async () => {
 		try {
@@ -20,6 +61,35 @@
 			console.error(error);
 		}
 	}
+
+	const handleAddFood = async () => {
+        try {
+			const id = Date.now(); //Spaghettisolution, could be improved
+			newFood.id = id;
+
+            const response = await fetch('http://localhost:5126/api/Foods', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newFood)
+            });
+            if (!response.ok) {
+                throw new Error('Failed to add new food item');
+            }
+            // Refresh the list of foods after adding a new item
+            fetchFoods();
+            // Close the modal
+            modalOpen = false;
+            // Reset the newFood object
+            newFood = { name: '', carbohydrates: 0, protein: 0, fat: 0, fiber: 0 };
+        } catch (error) {
+            console.error(error);
+        }
+    };
+	const closeModal = () => {
+        modalOpen = false; // Set modalOpen to false to close the modal
+    };
 
 	const handleDelete = async (id) => {
         try {
@@ -86,7 +156,7 @@
 		</table>
 	
 
-	<button class="calc-button">
+	<button class="calc-button" on:click={() => modalOpen = true}>
 		<span>Lisää ruoka</span>
 		<span class="plus">+</span>
 	</button>
@@ -153,5 +223,52 @@
         stroke-linejoin: round;
         stroke-width: 2;
     }
+	
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; 
+        height: 100%; 
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.4); 
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; 
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+    }
+	.modal input {
+		width: 6%;
+        margin-right: 10px; /* Add some margin between inputs */
+        margin-bottom: 5px; /* Add some bottom margin to separate the inputs */
+	}
+	.modal button {
+        width: 10%; 
+        margin-top: 10px; 
+    }
+	.modal button[type="submit"] {
+        background-color: green;
+        color: white;
+        border: 2px solid #333;
+		cursor: pointer;
+    }
+	.modal button[type="button"] {
+        background-color: red;
+        color: white;
+        border: 2px solid #333;
+		cursor: pointer;
+    }
+	.modal h2 {
+		text-align: center;
+		text-decoration: underline;
+		font-weight: bold;
+	}
 </style>
 
